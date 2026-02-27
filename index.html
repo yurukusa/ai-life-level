@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Life Level — あなたのAI生活難易度は？</title>
+<meta name="description" content="7つの質問であなたのAI生活の「ゲーム難易度」を判定。Easy？それともHardcore？">
+<meta property="og:title" content="AI Life Level — あなたのAI生活難易度は？">
+<meta property="og:description" content="7問でわかる、あなたのAI依存度。ゲーム難易度で判定。">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a12;
+  --surface: #12121c;
+  --surface-2: #1a1a2a;
+  --surface-3: #222236;
+  --accent: #8b5cf6;
+  --accent-dim: rgba(139, 92, 246, 0.15);
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --green: #22c55e;
+  --blue: #3b82f6;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --crimson: #dc2626;
+  --gold: #fbbf24;
+  --text: #e8e8f0;
+  --text-dim: #8888a8;
+  --text-faint: #555570;
+  --border: #2a2a40;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Language toggle */
+.lang-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+.lang-btn {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 2.5rem 0 2rem;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+header h1 .hl { color: var(--accent); }
+
+header .tagline {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 2rem;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--blue));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  animation: slideIn 0.35s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.q-number {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.8rem;
+}
+
+.q-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.option-btn {
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.option-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.option-btn .opt-key {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.option-btn:hover .opt-key {
+  background: var(--accent);
+  color: white;
+}
+
+/* Start screen */
+.start-screen {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.start-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.start-desc {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  max-width: 400px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, var(--accent), #6366f1);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px var(--accent-glow);
+}
+
+/* Result screen */
+.result-screen {
+  display: none;
+  text-align: center;
+  animation: fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-difficulty {
+  padding: 2.5rem 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-difficulty::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+}
+
+.rd-icon { font-size: 4rem; margin-bottom: 0.5rem; position: relative; }
+.rd-level {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  position: relative;
+}
+.rd-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.rd-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  max-width: 380px;
+  margin: 0 auto;
+  position: relative;
+  line-height: 1.6;
+}
+
+/* Score breakdown */
+.score-breakdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.sb-title {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.sb-bar {
+  margin-bottom: 0.8rem;
+}
+
+.sb-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.sb-bar-label span:last-child {
+  color: var(--text-dim);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.sb-bar-track {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sb-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* Share buttons */
+.share-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.share-btn:hover { transform: translateY(-1px); }
+.share-btn.twitter { background: #1d9bf0; color: white; }
+.share-btn.copy { background: var(--surface-2); color: var(--text); }
+.share-btn.retry { background: var(--accent); color: white; }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.footer a { color: var(--accent); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+/* Difficulty color themes */
+.diff-easy { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border: 2px solid rgba(34,197,94,0.4); }
+.diff-easy .rd-title { color: var(--green); }
+.diff-normal { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.05)); border: 2px solid rgba(59,130,246,0.4); }
+.diff-normal .rd-title { color: var(--blue); }
+.diff-hard { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05)); border: 2px solid rgba(245,158,11,0.4); }
+.diff-hard .rd-title { color: var(--orange); }
+.diff-nightmare { background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05)); border: 2px solid rgba(239,68,68,0.4); }
+.diff-nightmare .rd-title { color: var(--red); }
+.diff-hardcore { background: linear-gradient(135deg, rgba(220,38,38,0.25), rgba(139,92,246,0.15)); border: 2px solid rgba(220,38,38,0.6); }
+.diff-hardcore .rd-title { color: var(--crimson); }
+
+.hidden { display: none; }
+
+@media (max-width: 500px) {
+  header h1 { font-size: 1.5rem; }
+  .q-text { font-size: 1rem; }
+  .rd-title { font-size: 1.6rem; }
+  .question-card { padding: 1.5rem 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="lang-toggle">
+  <button class="lang-btn" id="lang-btn" onclick="toggleLang()">English</button>
+</div>
+
+<div class="container">
+
+<header>
+  <h1>AI <span class="hl">Life Level</span></h1>
+  <p class="tagline" data-ja="あなたのAI生活、ゲームで言うと何難易度？" data-en="What's your AI life difficulty rating?">あなたのAI生活、ゲームで言うと何難易度？</p>
+</header>
+
+<!-- Start Screen -->
+<div id="start-screen" class="start-screen">
+  <div class="start-icon">🎮</div>
+  <div class="start-desc" data-ja="7つの質問に答えるだけ。あなたのAI生活が「イージーモード」なのか「ハードコア」なのか判定します。所要時間: 1分。" data-en="Just 7 questions. Find out if your AI life is on Easy Mode or Hardcore. Takes 1 minute.">7つの質問に答えるだけ。あなたのAI生活が「イージーモード」なのか「ハードコア」なのか判定します。所要時間: 1分。</div>
+  <button class="start-btn" onclick="startQuiz()" data-ja="診断スタート" data-en="Start">診断スタート</button>
+</div>
+
+<!-- Quiz Section -->
+<div id="quiz-section" class="hidden">
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">1 / 7</span>
+      <span id="progress-pct">14%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 14%"></div>
+    </div>
+  </div>
+  <div id="question-area"></div>
+</div>
+
+<!-- Result Screen -->
+<div id="result-screen" class="result-screen">
+  <div class="result-difficulty" id="result-card">
+    <div class="rd-icon" id="r-icon"></div>
+    <div class="rd-level" id="r-level"></div>
+    <div class="rd-title" id="r-title"></div>
+    <div class="rd-subtitle" id="r-subtitle"></div>
+  </div>
+
+  <div class="score-breakdown" id="score-breakdown"></div>
+
+  <div class="share-row">
+    <button class="share-btn twitter" onclick="shareTwitter()" data-ja="Xでシェア" data-en="Share on X">Xでシェア</button>
+    <button class="share-btn copy" onclick="copyResult()" data-ja="結果をコピー" data-en="Copy Result">結果をコピー</button>
+    <button class="share-btn retry" onclick="retry()" data-ja="もう一度" data-en="Try Again">もう一度</button>
+  </div>
+</div>
+
+<div class="footer">
+  Part of the <a href="https://yurukusa.github.io/">yurukusa</a> ecosystem &mdash;
+  <a href="https://yurukusa.github.io/cc-bingo/">CC Bingo</a> &middot;
+  <a href="https://yurukusa.github.io/ai-cost-reality/">AI Cost Reality</a> &middot;
+  <a href="https://yurukusa.github.io/cc-roast/">CC Roast</a>
+</div>
+
+</div>
+
+<script>
+let lang = 'ja';
+let currentQ = 0;
+let scores = [];
+let resultData = null;
+
+const Q_JA = [
+  {
+    text: 'AIを使い始めてどのくらい？',
+    cat: '経験値',
+    options: [
+      { text: 'まだ始めたばかり（1ヶ月未満）', score: 1 },
+      { text: '数ヶ月くらい', score: 2 },
+      { text: '半年〜1年', score: 3 },
+      { text: '1年以上。もう古参', score: 4 }
+    ]
+  },
+  {
+    text: 'AIに月いくら払ってる？',
+    cat: '課金力',
+    options: [
+      { text: '無料で使ってる', score: 0 },
+      { text: '〜$20くらい（1つのサービス）', score: 1 },
+      { text: '$20〜$100（複数サービス）', score: 3 },
+      { text: '$100以上。投資だと思ってる', score: 5 }
+    ]
+  },
+  {
+    text: 'AIに「ありがとう」「ごめん」を言ったことがある？',
+    cat: '感情移入',
+    options: [
+      { text: 'ない。機械でしょ？', score: 0 },
+      { text: 'たまに言ってしまう', score: 1 },
+      { text: 'けっこう言う。礼儀だから', score: 2 },
+      { text: '毎回言う。名前もつけた', score: 4 }
+    ]
+  },
+  {
+    text: 'AIなしで今の仕事・作業ができる？',
+    cat: '依存度',
+    options: [
+      { text: '余裕。あくまで補助ツール', score: 0 },
+      { text: 'できるけど、効率は落ちる', score: 1 },
+      { text: 'かなりキツい。戻れない', score: 3 },
+      { text: '無理。AIが本体で自分がアシスタント', score: 5 }
+    ]
+  },
+  {
+    text: 'AIのせいで生活習慣が変わった？',
+    cat: '生活変化',
+    options: [
+      { text: '特に変わらない', score: 0 },
+      { text: '少し変わった（検索の仕方とか）', score: 1 },
+      { text: 'かなり変わった（仕事の進め方が根本から）', score: 3 },
+      { text: '完全に変わった。AIが生活の中心', score: 5 }
+    ]
+  },
+  {
+    text: 'AIが想定外のことをした時の反応は？',
+    cat: '耐性',
+    options: [
+      { text: 'え？ってびっくりする', score: 1 },
+      { text: '「またか」って思う', score: 2 },
+      { text: 'むしろ楽しんでる', score: 3 },
+      { text: 'もう何も驚かない。全部想定内', score: 4 }
+    ]
+  },
+  {
+    text: '深夜（0時以降）にAIを使ったことは？',
+    cat: '廃人度',
+    options: [
+      { text: 'ない。健全な生活', score: 0 },
+      { text: 'たまにある', score: 1 },
+      { text: 'よくある。気づいたら朝', score: 3 },
+      { text: '深夜がメインの作業時間', score: 5 }
+    ]
+  }
+];
+
+const Q_EN = [
+  {
+    text: 'How long have you been using AI?',
+    cat: 'Experience',
+    options: [
+      { text: 'Just started (less than a month)', score: 1 },
+      { text: 'A few months', score: 2 },
+      { text: '6 months to a year', score: 3 },
+      { text: 'Over a year. I\'m a veteran', score: 4 }
+    ]
+  },
+  {
+    text: 'How much do you spend on AI per month?',
+    cat: 'Investment',
+    options: [
+      { text: 'Nothing. Free tier only', score: 0 },
+      { text: '~$20 (one service)', score: 1 },
+      { text: '$20-100 (multiple services)', score: 3 },
+      { text: '$100+. I consider it an investment', score: 5 }
+    ]
+  },
+  {
+    text: 'Have you ever said "thank you" or "sorry" to AI?',
+    cat: 'Attachment',
+    options: [
+      { text: 'No. It\'s a machine', score: 0 },
+      { text: 'Sometimes, accidentally', score: 1 },
+      { text: 'Often. It\'s polite', score: 2 },
+      { text: 'Every time. I even named it', score: 4 }
+    ]
+  },
+  {
+    text: 'Can you do your work without AI?',
+    cat: 'Dependency',
+    options: [
+      { text: 'Easily. AI is just a helper', score: 0 },
+      { text: 'I could, but less efficiently', score: 1 },
+      { text: 'Barely. Can\'t go back', score: 3 },
+      { text: 'Impossible. AI is the main worker, I\'m the assistant', score: 5 }
+    ]
+  },
+  {
+    text: 'Has AI changed your daily habits?',
+    cat: 'Lifestyle',
+    options: [
+      { text: 'Not really', score: 0 },
+      { text: 'A little (like how I search)', score: 1 },
+      { text: 'Significantly (how I work has changed)', score: 3 },
+      { text: 'Completely. AI is the center of my life', score: 5 }
+    ]
+  },
+  {
+    text: 'How do you react when AI does something unexpected?',
+    cat: 'Resilience',
+    options: [
+      { text: 'Surprised every time', score: 1 },
+      { text: '"Here we go again"', score: 2 },
+      { text: 'I actually enjoy it', score: 3 },
+      { text: 'Nothing surprises me anymore', score: 4 }
+    ]
+  },
+  {
+    text: 'Have you ever used AI past midnight?',
+    cat: 'Degenerate',
+    options: [
+      { text: 'Never. Healthy lifestyle', score: 0 },
+      { text: 'Occasionally', score: 1 },
+      { text: 'Often. "Just one more prompt" at 3 AM', score: 3 },
+      { text: 'Late night is my main work time', score: 5 }
+    ]
+  }
+];
+
+const RESULTS_JA = [
+  {
+    max: 5, cls: 'diff-easy', icon: '🌿',
+    level: 'DIFFICULTY', title: 'Easy Mode',
+    subtitle: 'まだ序盤。チュートリアルも終わってない感じ。AIは便利な道具の一つ。健全。この健全さを大事にしてほしい。',
+    flavor: 'あなたの冒険はまだ始まったばかり。'
+  },
+  {
+    max: 12, cls: 'diff-normal', icon: '⚔️',
+    level: 'DIFFICULTY', title: 'Normal Mode',
+    subtitle: 'バランスよくAIを使いこなしている。依存もしてないし、拒絶もしてない。理想的なプレイスタイル。',
+    flavor: 'ちょうどいい難易度で遊んでいる。'
+  },
+  {
+    max: 19, cls: 'diff-hard', icon: '🔥',
+    level: 'DIFFICULTY', title: 'Hard Mode',
+    subtitle: 'AIなしの生活に戻れなくなりつつある。課金も増えてきた。でも後悔はしてない。むしろ楽しんでる。',
+    flavor: '引き返すにはもう遅い。'
+  },
+  {
+    max: 25, cls: 'diff-nightmare', icon: '💀',
+    level: 'DIFFICULTY', title: 'Nightmare Mode',
+    subtitle: 'AIと共依存の関係。深夜作業が日常。課金額は見ないようにしている。でもAIがいない世界にはもう戻れない。',
+    flavor: 'あなたはすでにゲームの中にいる。'
+  },
+  {
+    max: 32, cls: 'diff-hardcore', icon: '☠️',
+    level: 'DIFFICULTY', title: 'Hardcore Mode',
+    subtitle: '人生がハードコアゲームになった。AIが生活の中心で、AIのために生活が回っている。あなたは伝説のプレイヤーだ。',
+    flavor: 'セーブポイントなし。残機ゼロ。でも楽しい。'
+  }
+];
+
+const RESULTS_EN = [
+  {
+    max: 5, cls: 'diff-easy', icon: '🌿',
+    level: 'DIFFICULTY', title: 'Easy Mode',
+    subtitle: 'Still early game. Tutorial hasn\'t ended. AI is just a handy tool. You\'re healthy. Keep that.',
+    flavor: 'Your adventure has barely begun.'
+  },
+  {
+    max: 12, cls: 'diff-normal', icon: '⚔️',
+    level: 'DIFFICULTY', title: 'Normal Mode',
+    subtitle: 'Balanced AI usage. Not dependent, not resistant. The ideal playstyle.',
+    flavor: 'Playing on just the right difficulty.'
+  },
+  {
+    max: 19, cls: 'diff-hard', icon: '🔥',
+    level: 'DIFFICULTY', title: 'Hard Mode',
+    subtitle: 'Going back to no-AI life is getting hard. Spending is up. No regrets though. You\'re enjoying the challenge.',
+    flavor: 'Too late to turn back.'
+  },
+  {
+    max: 25, cls: 'diff-nightmare', icon: '💀',
+    level: 'DIFFICULTY', title: 'Nightmare Mode',
+    subtitle: 'Co-dependent with AI. Late-night sessions are normal. You don\'t look at the bill. But you can\'t imagine life without AI.',
+    flavor: 'You\'re already inside the game.'
+  },
+  {
+    max: 32, cls: 'diff-hardcore', icon: '☠️',
+    level: 'DIFFICULTY', title: 'Hardcore Mode',
+    subtitle: 'Life has become a hardcore game. AI is the center of everything. Your schedule revolves around AI. You are a legendary player.',
+    flavor: 'No save points. No extra lives. But it\'s fun.'
+  }
+];
+
+function t(ja, en) { return lang === 'ja' ? ja : en; }
+function getQuestions() { return lang === 'ja' ? Q_JA : Q_EN; }
+function getResults() { return lang === 'ja' ? RESULTS_JA : RESULTS_EN; }
+
+function toggleLang() {
+  lang = lang === 'ja' ? 'en' : 'ja';
+  document.getElementById('lang-btn').textContent = lang === 'ja' ? 'English' : '日本語';
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+
+  // Re-render current question if in quiz
+  if (!document.getElementById('quiz-section').classList.contains('hidden')) {
+    renderQuestion();
+  }
+
+  // Re-render result if showing
+  if (document.getElementById('result-screen').style.display === 'block' && resultData) {
+    showResult();
+  }
+}
+
+function startQuiz() {
+  currentQ = 0;
+  scores = [];
+  resultData = null;
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('quiz-section').classList.remove('hidden');
+  document.getElementById('result-screen').style.display = 'none';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const questions = getQuestions();
+  const q = questions[currentQ];
+  const area = document.getElementById('question-area');
+  const pct = Math.round(((currentQ + 1) / questions.length) * 100);
+
+  document.getElementById('progress-text').textContent = (currentQ + 1) + ' / ' + questions.length;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const keys = ['A', 'B', 'C', 'D'];
+  let html = '<div class="question-card">';
+  html += '<div class="q-number">Q' + (currentQ + 1) + ' — ' + q.cat + '</div>';
+  html += '<div class="q-text">' + q.text + '</div>';
+  html += '<div class="options">';
+  q.options.forEach((opt, i) => {
+    html += '<button class="option-btn" onclick="answer(' + opt.score + ')">' +
+      '<span class="opt-key">' + keys[i] + '</span>' +
+      '<span>' + opt.text + '</span>' +
+      '</button>';
+  });
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function answer(score) {
+  scores.push(score);
+  currentQ++;
+
+  const questions = getQuestions();
+  if (currentQ >= questions.length) {
+    calculateResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function calculateResult() {
+  const total = scores.reduce((a, b) => a + b, 0);
+  const results = getResults();
+  let result = results[results.length - 1];
+  for (const r of results) {
+    if (total <= r.max) { result = r; break; }
+  }
+  resultData = { total, maxScore: 32, result, scores };
+  showResult();
+}
+
+function showResult() {
+  const { total, maxScore, result } = resultData;
+
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('result-screen').style.display = 'block';
+
+  const card = document.getElementById('result-card');
+  card.className = 'result-difficulty ' + result.cls;
+  document.getElementById('r-icon').textContent = result.icon;
+  document.getElementById('r-level').textContent = result.level;
+  document.getElementById('r-title').textContent = result.title;
+  document.getElementById('r-subtitle').textContent = result.subtitle;
+
+  // Score breakdown
+  const questions = getQuestions();
+  const cats = questions.map((q, i) => ({ cat: q.cat, score: resultData.scores[i], max: Math.max(...q.options.map(o => o.score)) }));
+  const colors = ['var(--green)', 'var(--blue)', 'var(--accent)', 'var(--orange)', 'var(--red)', 'var(--crimson)', 'var(--gold)'];
+
+  let sbHtml = '<div class="sb-title">' + t('スコア内訳', 'Score Breakdown') + ' — ' + total + '/' + maxScore + '</div>';
+  cats.forEach((c, i) => {
+    const pct = c.max > 0 ? Math.round((c.score / c.max) * 100) : 0;
+    sbHtml += '<div class="sb-bar">' +
+      '<div class="sb-bar-label"><span>' + c.cat + '</span><span>' + c.score + '/' + c.max + '</span></div>' +
+      '<div class="sb-bar-track"><div class="sb-bar-fill" style="width:' + pct + '%;background:' + colors[i] + '"></div></div>' +
+      '</div>';
+  });
+  sbHtml += '<div style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--text-dim);font-style:italic">' + result.flavor + '</div>';
+  document.getElementById('score-breakdown').innerHTML = sbHtml;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shareTwitter() {
+  if (!resultData) return;
+  const { total, result } = resultData;
+  const text = t(
+    'AI Life Level: ' + result.title + '（' + total + '/32）\n' +
+    result.flavor + '\n\n' +
+    'あなたのAI生活難易度は？',
+    'AI Life Level: ' + result.title + ' (' + total + '/32)\n' +
+    result.flavor + '\n\n' +
+    'What\'s your AI life difficulty?'
+  );
+  const url = 'https://yurukusa.github.io/ai-life-level/';
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+}
+
+function copyResult() {
+  if (!resultData) return;
+  const { total, result } = resultData;
+  const text = 'AI Life Level\n' +
+    result.icon + ' ' + result.title + ' (' + total + '/32)\n' +
+    result.subtitle + '\n\n' +
+    'https://yurukusa.github.io/ai-life-level/';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-btn.copy');
+    const orig = btn.textContent;
+    btn.textContent = lang === 'ja' ? 'コピー完了!' : 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+function retry() {
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('start-screen').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
